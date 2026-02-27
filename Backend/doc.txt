@@ -1,0 +1,5 @@
+.env file contains all the environment variables
+
+PORT
+MONGODB_URI
+JWT_SECRET_KEY
