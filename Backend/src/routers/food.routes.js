@@ -1,7 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const { foodUpload } = require("../controllers/foodItem.controller");
+const {
+  authFoodPartnerMiddleware,
+  authUser,
+} = require("../middleware/foodPartner.middleware");
+const {
+  foodUpload,
+  getFoodItems,
+} = require("../controllers/foodItem.controller");
+const multer = require("multer");
 
-router.post("/upload", foodUpload);
+const upload = multer({
+  storage: multer.memoryStorage(),
+});
+
+router.post(
+  "/upload",
+  authFoodPartnerMiddleware,
+  upload.single("video"),
+  foodUpload,
+);
+
+router.get("/getfooditems", authUser, getFoodItems);
 
 module.exports = router;
