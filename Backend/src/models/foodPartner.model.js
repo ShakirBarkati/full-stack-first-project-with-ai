@@ -5,15 +5,35 @@ const foodPartnerSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
+    },
+    contactName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    contactNumber: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
+      select: false,
     },
     role: {
       type: String,
@@ -25,6 +45,6 @@ const foodPartnerSchema = new mongoose.Schema(
   },
 );
 
-const foodPartnerModel = mongoose.model("foodPartner", foodPartnerSchema);
+const foodPartnerModel = mongoose.model("FoodPartner", foodPartnerSchema);
 
 module.exports = foodPartnerModel;

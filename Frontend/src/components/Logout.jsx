@@ -1,0 +1,17 @@
+import React from 'react'
+import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+const Logout = () => {
+    const navigate = useNavigate();
+    async function logoutFun() {
+        await axios.get("localhost:3000/api/auth/user/logout", {
+            withCredentials: true
+        })
+        navigate("/user/login");
+    }
+    return (
+        <button onClick={logoutFun}>Logout</button>
+    )
+}
+
+export default Logout
