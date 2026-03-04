@@ -7,6 +7,7 @@ const Logout = () => {
         await axios.get("localhost:3000/api/auth/user/logout", {
             withCredentials: true
         })
+        localStorage.clear();
         navigate("/user/login");
     }
     return (
