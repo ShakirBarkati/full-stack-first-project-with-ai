@@ -11,7 +11,7 @@ async function userRegister(req, res) {
   });
   if (isEmailAlreadyExist) {
     return res.status(400).json({
-      massage: "Email already exist",
+      message: "Email already exist",
     });
   }
   //   password hashed
@@ -48,6 +48,7 @@ async function userRegister(req, res) {
     console.log("Error in user register", err);
     return res.status(500).json({
       message: "Internal server error",
+      err: err,
     });
   }
 }
@@ -85,7 +86,7 @@ async function userLogin(req, res) {
     res.cookie("token", token);
     return res.status(200).json({
       message: "Login successfully",
-      data: {
+      user: {
         userName: user.fullName,
         email: user.email,
         role: user.role,

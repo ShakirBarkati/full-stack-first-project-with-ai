@@ -1,107 +1,125 @@
 import "./Auth.css";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
-const UserRegister = () => {
-
+const FoodPartnerLogin = () => {
   const navigate = useNavigate();
-  async function sendData(name, email, password) {
-    const response = await axios.post("http://localhost:3000/api/auth/user/register", {
-      fullName: name,
-      email: email,
-      password: password
-    }, {
-      withCredentials: true
-    })
-    console.log(response.data)
-    navigate("/");
-
-  }
-
-  function isEmailValid(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  }
-
-  function isPasswordValid(password, confirmPassword) {
-
-    if (password !== confirmPassword) {
-      return "Passwords do not match";
-    }
-
-    if (password.length < 6 || password.length > 20) {
-      return "Password must be between 6 and 20 characters";
-    }
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).+$/;
-
-    if (!passwordRegex.test(password)) {
-      return "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character";
-    }
-
-    return null; // means valid
-  }
-
-  function handleSubmit(event) {
-    event.preventDefault();
-
-    const name = event.target.fullName.value;
-    const email = event.target.email.value;
-    const password = event.target.password.value;
-    const confirmPassword = event.target.confirmPassword.value;
-
-    const emailValid = isEmailValid(email);
-    const passwordError = isPasswordValid(password, confirmPassword);
-
-    if (!emailValid) {
-      alert("Invalid email");
+  const [isLoading, setIsLoading] = useState(false);
+  function confirmPasswordFun(password, confirmPassword) {
+    if (password.value === "" || confirmPassword.value === "") {
       return;
     }
+    if (password.value !== confirmPassword.value) {
+      confirmPassword.setCustomValidity("Passwords don't match");
 
-    if (passwordError) {
-      alert(passwordError);
-      return;
+    } else {
+      confirmPassword.setCustomValidity("");
     }
-
-    sendData(name, email, password);
   }
+  async function userRegisterFun(e) {
+    e.preventDefault();
+    const form = e.target;
+    const { fullName, email, password, confirmPassword } = form;
+    confirmPasswordFun(password, confirmPassword)
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return
+    }
+    try {
+      setIsLoading(true);
+      Swal.fire({
+        title: "Register in...",
+        text: "Please wait",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/user/register",
+        {
+          fullName: fullName.value.trim(),
+          email: email.value.trim(),
+          password: password.value,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      Swal.close();
+      await Swal.fire({
+        icon: "success",
+        title: "Registration Successful",
+        text: "Welcome to the User Portal.",
+
+        confirmButtonColor: "#1d4ed8",
+      });
+      navigate("/");
+    } catch (err) {
+      Swal.close();
+      console.log("Server Err", err.response.data);
+      await Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: err.response?.data?.message || "Unable to register",
+        confirmButtonColor: "#dc2626",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <div className="auth-container">
-      <div className="auth-card">
-        <h2>User Register</h2>
+      <div className="auth-layout">
+        <section className="auth-visual">
+          <p className="auth-badge">User Portal</p>
+          <h2>User Register</h2>
+          <p>
+            Register to your account.
+          </p>
+        </section>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Full Name</label>
-            <input type="text" placeholder="Enter username" name="fullName" />
-          </div>
+        <section className="auth-card">
+          <h1>User Register</h1>
 
-          <div className="form-group">
-            <label>Email</label>
-            <input type="email" placeholder="Enter email" name="email" />
-          </div>
+          <form onSubmit={userRegisterFun}>
+            <div className="form-grid">
+              <div className="form-group form-group-full">
+                <label>Full Name</label>
+                <input type="text" placeholder="Enter your full name" name="fullName" required />
+              </div>
+              <div className="form-group form-group-full">
+                <label>Email</label>
+                <input type="email" placeholder="Enter your email" name="email" required />
+              </div>
 
-          <div className="form-group">
-            <label>Password</label>
-            <input type="password" placeholder="Enter password" name="password" />
-          </div>
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <input type="password" placeholder="Enter password" name="confirmPassword" />
-          </div>
+              <div className="form-group form-group-full">
+                <label>Password</label>
+                <input type="password" placeholder="Enter your password" name="password" required />
+              </div>
+              <div className="form-group form-group-full">
+                <label>Confirm Password</label>
+                <input type="password" placeholder="Re-enter your password" name="confirmPassword" required />
+              </div>
+            </div>
 
-          <button type="submit" className="auth-btn">
-            UserRegister
-          </button>
-        </form>
+            <button type="submit" className="auth-btn" disabled={isLoading}>
+              {isLoading ? "Signing up..." : "Sign Up"}
+            </button>
+          </form>
 
-        <p className="auth-footer">
-          Already have an account? <span>Login</span>
-        </p>
+          <p className="auth-footer">
+            I already have an account. <Link to="/foodpartner/login">Log in</Link>
+          </p>
+        </section>
       </div>
     </div>
   );
 };
 
-export default UserRegister;
+export default FoodPartnerLogin;
